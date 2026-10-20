@@ -1,0 +1,318 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShopEasy - Online Shopping</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f6fa;
+      color: #222;
+    }
+
+    header {
+      background: #202c5a;
+      color: rgb(95, 37, 37);
+      padding: 20px 6%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    header h1 {
+      font-size: 28px;
+    }
+
+    #cart-count {
+      background: #ffca28;
+      color: #222;
+      padding: 9px 15px;
+      border-radius: 20px;
+      font-weight: bold;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 45px 15px;
+      background: #e0e7ff;
+    }
+
+    .hero h2 {
+      font-size: 32px;
+      margin-bottom: 12px;
+      color: #202c5a;
+    }
+
+    .search-box {
+      display: block;
+      width: 85%;
+      max-width: 450px;
+      margin: 20px auto 0;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    .products {
+      padding: 35px 6%;
+    }
+
+    .products h2, .cart h2 {
+      margin-bottom: 22px;
+      color: #202c5a;
+    }
+
+    .product-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 22px;
+    }
+
+    .product {
+      background: white;
+      border-radius: 12px;
+      padding: 15px;
+      text-align: center;
+      box-shadow: 0 3px 12px #00000012;
+    }
+
+    .product img {
+      width: 100%;
+      height: 190px;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+
+    .product h3 {
+      margin: 12px 0;
+    }
+
+    .price {
+      color: #168044;
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 14px;
+    }
+
+    button {
+      background: #202c5a;
+      color: white;
+      border: none;
+      padding: 11px 15px;
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    button:hover {
+      background: #354b92;
+    }
+
+    .cart {
+      background: white;
+      padding: 28px 6%;
+      margin: 10px 6% 35px;
+      border-radius: 12px;
+    }
+
+    #cart-items {
+      padding-left: 20px;
+      line-height: 2;
+    }
+
+    #total {
+      margin: 18px 0;
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .remove-btn {
+      background: #c62828;
+      padding: 5px 9px;
+      margin-left: 10px;
+    }
+
+    footer {
+      background: #202c5a;
+      color: white;
+      text-align: center;
+      padding: 22px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <h1>ShopEasy</h1>
+    <div id="cart-count">🛒 Cart: 0</div>
+  </header>
+
+  <section class="hero">
+    <h2>Welcome to ShopEasy!</h2>
+    <p>Shop your favourite products at great prices.</p>
+    <input
+      class="search-box"
+      id="search"
+      type="text"
+      placeholder="Search products..."
+      oninput="showProducts()"
+    >
+  </section>
+
+  <section class="products">
+    <h2>Our Products</h2>
+    <div class="product-list" id="product-list"></div>
+  </section>
+
+  <section class="cart">
+    <h2>🛒 Your Shopping Cart</h2>
+    <ul id="cart-items">
+      <li>Your cart is empty.</li>
+    </ul>
+    <p id="total">Total: ₹0</p>
+    <button onclick="checkout()">Place Order</button>
+  </section>
+
+  <footer>
+    <p>© 2026 ShopEasy | Happy Shopping!</p>
+  </footer>
+
+  <script>
+    const products = [
+      {
+        id: 1,
+        name: "Headphones",
+        price: 799,
+        image: "https://placehold.co/300x200/e0e7ff/202c5a?text=Headphones"
+      },
+      {
+        id: 2,
+        name: "Smart Watch",
+        price: 1499,
+        image: "https://placehold.co/300x200/e0e7ff/202c5a?text=Smart+Watch"
+      },
+      {
+        id: 3,
+        name: "Shoes",
+        price: 1299,
+        image: "https://placehold.co/300x200/e0e7ff/202c5a?text=Shoes"
+      },
+      {
+        id: 4,
+        name: "Backpack",
+        price: 699,
+        image: "https://placehold.co/300x200/e0e7ff/202c5a?text=Backpack"
+      },
+      {
+        id: 5,
+        name: "Camera",
+        price: 4999,
+        image: "https://placehold.co/300x200/e0e7ff/202c5a?text=Camera"
+      },
+      {
+        id: 6,
+        name: "Sunglasses",
+        price: 499,
+        image: "https://placehold.co/300x200/e0e7ff/202c5a?text=Sunglasses"
+      }
+    ];
+
+    let cart = [];
+
+    function showProducts() {
+      const list = document.getElementById("product-list");
+      const search = document.getElementById("search").value.toLowerCase();
+
+      const filtered = products.filter(product =>
+        product.name.toLowerCase().includes(search)
+      );
+
+      list.innerHTML = "";
+
+      if (filtered.length === 0) {
+        list.textContent = "No products found.";
+        return;
+      }
+
+      filtered.forEach(product => {
+        list.innerHTML += `
+          <div class="product">
+            <img src="${product.image}" alt="${product.name}">
+            <h3>${product.name}</h3>
+            <p class="price">₹${product.price}</p>
+            <button onclick="addToCart(${product.id})">
+              Add to Cart
+            </button>
+          </div>
+        `;
+      });
+    }
+
+    function addToCart(id) {
+      const product = products.find(item => item.id === id);
+      cart.push(product);
+      showCart();
+    }
+
+    function removeFromCart(index) {
+      cart.splice(index, 1);
+      showCart();
+    }
+
+    function showCart() {
+      const list = document.getElementById("cart-items");
+      const total = cart.reduce((sum, item) => sum + item.price, 0);
+
+      document.getElementById("cart-count").textContent =
+        `🛒 Cart: ${cart.length}`;
+
+      list.innerHTML = "";
+
+      if (cart.length === 0) {
+        list.innerHTML = "<li>Your cart is empty.</li>";
+      } else {
+        cart.forEach((item, index) => {
+          list.innerHTML += `
+            <li>
+              ${item.name} - ₹${item.price}
+              <button class="remove-btn"
+                onclick="removeFromCart(${index})">Remove</button>
+            </li>
+          `;
+        });
+      }
+
+      document.getElementById("total").textContent =
+        `Total: ₹${total}`;
+    }
+
+    function checkout() {
+      if (cart.length === 0) {
+        alert("Please add a product to your cart first!");
+        return;
+      }
+
+      alert("Demo website: Your order total is ₹" +
+        cart.reduce((sum, item) => sum + item.price, 0) +
+        ". Real order placement is not connected yet.");
+    }
+
+    showProducts();
+    showCart();
+  </script>
+
+</body>
+</html>
